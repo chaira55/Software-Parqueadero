@@ -1,5 +1,3 @@
-package java;
-
 public class Servicio {
     private int id;
     private String nombre;

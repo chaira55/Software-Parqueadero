@@ -1,5 +1,3 @@
-package java;
-
 public class Vehiculo {
     private int id;
     private String tipoVehiculo;

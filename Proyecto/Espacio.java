@@ -1,5 +1,3 @@
-package java;
-
 public class Espacio {
     private int id;
     private String tipoVehiculo;

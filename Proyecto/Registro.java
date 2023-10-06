@@ -1,5 +1,3 @@
-package java;
-
 public class Registro {
     private int id;
     private String vehiculo;
