@@ -62,6 +62,19 @@ public class Servicio {
         }
     }
 
+    public void registrarCargaAuto(String cliente, String ubicacion) {
+        PuntoCargaEV puntoCarga = buscarPuntoCargaEV(ubicacion);
+        if (puntoCarga != null && puntoCarga.getCuposDisponibles() > 0) {
+            puntoCarga.ocuparCupo(); // Ocupamos un cupo
+            this.tarifaUso = 125000.0f;
+            this.saldoTotal += this.tarifaUso;
+            String servicioRegistrado = "Cliente: " + cliente + ", Carga de Auto en: " + ubicacion + ", Costo: $" + this.tarifaUso;
+            serviciosRegistrados.add(servicioRegistrado);
+        } else {
+            System.out.println("No se pudo registrar la carga de auto en: " + ubicacion);
+        }
+    }
+
     public void eliminarPuntoCargaEV(String ubicacion) {
         puntosCargaEV.removeIf(puntoCarga -> puntoCarga.getUbicacion().equals(ubicacion));
     }
@@ -80,12 +93,20 @@ public class Servicio {
     public boolean asignarPuntoCargaEV(String ubicacion) {
         for (PuntoCargaEV puntoCarga : puntosCargaEV) {
             if (puntoCarga.getUbicacion().equals(ubicacion) && !puntoCarga.isOcupado()) {
-                puntoCarga.setOcupado(true);
+                puntoCarga.ocuparCupo();
                 this.tarifaUso = 125000.0f;
                 return true;
             }
         }
         return false; 
+    }
+
+    public void cancelarCargaAuto(String cliente, String ubicacion) {
+        PuntoCargaEV puntoCarga = buscarPuntoCargaEV(ubicacion);
+        if (puntoCarga != null) {
+            puntoCarga.liberarCupo(); // Liberamos un cupo
+        }
+        cancelarServicio(cliente, "Carga de Auto en: " + ubicacion);
     }
 
     public void crearServicioAdicional(String nombre, int op) {
@@ -166,18 +187,6 @@ public class Servicio {
         }
     }
 
-    public void registrarCargaAuto(String cliente, String ubicacion) {
-        PuntoCargaEV puntoCarga = buscarPuntoCargaEV(ubicacion);
-        if (puntoCarga != null && !puntoCarga.isOcupado()) {
-            this.tarifaUso = 125000.0f;
-            puntoCarga.setOcupado(true);
-            this.saldoTotal += this.tarifaUso;
-            String servicioRegistrado = "Cliente: " + cliente + ", Carga de Auto en: " + ubicacion + ", Costo: $" + this.tarifaUso;
-            serviciosRegistrados.add(servicioRegistrado);
-        } else {
-            System.out.println("No se pudo registrar la carga de auto en: " + ubicacion);
-        }
-    }
 
     public void cancelarServicio(String cliente, String descripcion) {
         RegistroServicio servicioAEliminar = null;
@@ -238,12 +247,12 @@ public class Servicio {
 class PuntoCargaEV {
     private String ubicacion;
     private int capacidad;
-    private boolean ocupado;
+    private int cuposDisponibles; 
 
     public PuntoCargaEV(String ubicacion, int capacidad) {
         this.ubicacion = ubicacion;
         this.capacidad = capacidad;
-        this.ocupado = false;
+        this.cuposDisponibles = capacidad; 
     }
 
     public String getUbicacion() {
@@ -254,14 +263,27 @@ class PuntoCargaEV {
         return capacidad;
     }
 
-    public boolean isOcupado() {
-        return ocupado;
+    public int getCuposDisponibles() {
+        return cuposDisponibles;
     }
 
-    public void setOcupado(boolean ocupado) {
-        this.ocupado = ocupado;
+    public boolean isOcupado() {
+        return cuposDisponibles == 0;
+    }
+
+    public void ocuparCupo() {
+        if (cuposDisponibles > 0) {
+            cuposDisponibles--;
+        }
+    }
+
+    public void liberarCupo() {
+        if (cuposDisponibles < capacidad) {
+            cuposDisponibles++;
+        }
     }
 }
+
 
 
 class ServicioAdicional {
